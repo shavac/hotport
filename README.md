@@ -1,2 +1,3 @@
 # mp1p
-Multiple Protocols on 1 Port. Now support ssh, rdp, http, https natively and arbitrarily other protocols by external supporting programs
+The network protocol proxy, support "Multiple Protocols on 1 Port" in particular. 
+Now support ssh, rdp, http, https natively and arbitrarily other protocols by external supporting programs

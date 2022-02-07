@@ -1,0 +1,45 @@
+[listen]
+
+    [listen.1]
+    addr = "0.0.0.0:80"
+    services = ["http", "ssh1", "ssh2", "rdp",  "tcp"]
+
+    [listen.2]
+    addr = "0.0.0.0:443"
+    services = ["https", "ssh2", "rdp"]
+
+    [listen.3]
+    addr = "127.0.0.1:81"
+    services = "tcp"
+
+
+[proto]
+
+    [proto.ssh]
+    protocol = "ssh"
+    forward_to = "1.1.2.1:6022"
+
+    [proto.ssh1]
+    protocol = "ssh"
+    login_user = "admin"
+    forward_to = "1.1.2.1:6022"
+
+    [proto.ssh2]
+    protocol = "ssh"
+    login_user = "bcast"
+    forward_to = "1.1.2.1:6022"
+
+    [proto.rdp]
+    protocol = "rdp"
+    forward_to = "1.1.2.1:6389"
+
+    [proto.http]
+    protocol = "http"
+    forward_to = "localhost:8080"
+
+    [proto.https]
+    protocol = "https"
+    forward_to = "localhost:8443"
+
+    [proto.tcp]
+    forward_to = "localhost:8443"
