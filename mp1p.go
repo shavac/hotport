@@ -1,29 +1,44 @@
 package main
 
 import (
-	"flag"
-	"log"
+	"net"
 
+	"github.com/prometheus/common/log"
 	"github.com/shavac/mp1p/cfg"
 	"github.com/shavac/mp1p/cmd"
 )
 
 var (
-	cfgPath *string
+	cfgChgEvt = make(chan bool)
 )
 
 func init() {
-	flag.Parse()
-	cfgPath = flag.String("c", "/etc/mp1p/mp1p.toml", "config file")
+	cmd.Execute()
+	cfg.OnChange(func() {
+		cfgChgEvt <- true
+	})
+}
 
+var allPorts = make(map[string]port)
+
+type port struct {
+	net.Listener
 }
 
 func main() {
-	cmd.Execute()
-	c, err := cfg.ReadFromTomlFile("etc/mp1p/mp1p.toml")
-	if err != nil {
-		log.Fatalln(err)
+	for {
+		//fmt.Println(cfg.Config())
+		for pName, pCfg := range cfg.Config().Port {
+			l, err := net.Listen("tcp", pCfg.ListenAddr)
+			if err != nil {
+				log.Errorln(err)
+			}
+			allPorts[pName] = port{l}
+			defer func() {
+				allPorts[pName].Listener.Close()
+				delete(allPorts, pName)
+			}()
+		}
+		<-cfgChgEvt
 	}
-	_ = c
-	//fmt.Printf("%+v", c)
 }

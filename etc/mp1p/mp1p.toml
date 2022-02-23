@@ -1,45 +1,58 @@
-[listen]
+[plugins]
 
-    [listen.1]
+paths = ["plugins"]
+
+[port]
+
+    [port.1]
     addr = "0.0.0.0:80"
     services = ["http", "ssh1", "ssh2", "rdp",  "tcp"]
 
-    [listen.2]
+    [port.2]
     addr = "0.0.0.0:443"
     services = ["https", "ssh2", "rdp"]
 
-    [listen.3]
-    addr = "127.0.0.1:81"
+    [port.3]
+    addr = "127.0.0.1:86"
     services = "tcp"
 
 
-[proto]
+[service]
 
-    [proto.ssh]
+    [service.ssh]
     protocol = "ssh"
-    forward_to = "1.1.2.1:6022"
+    forward_to = "ssh://1.1.2.1:6022"
 
-    [proto.ssh1]
+    [service.ssh1]
     protocol = "ssh"
     login_user = "admin"
-    forward_to = "1.1.2.1:6022"
+    forward_to = "ssh:1.1.2.1:6022"
 
-    [proto.ssh2]
+    [service.ssh2]
     protocol = "ssh"
     login_user = "bcast"
-    forward_to = "1.1.2.1:6022"
+    forward_to = "ssh://1.1.2.1:6022"
 
-    [proto.rdp]
+    [service.ssh2]
+    protocol = "ssh"
+    forward_to = "telnet://1.1.2.1:6022"
+
+    [service.rdp]
     protocol = "rdp"
-    forward_to = "1.1.2.1:6389"
+    forward_to = "rdp://1.1.2.1:6389"
 
-    [proto.http]
+    [service.http]
     protocol = "http"
-    forward_to = "localhost:8080"
+    forward_to = "http://localhost:8080"
 
-    [proto.https]
+    [service.https]
     protocol = "https"
-    forward_to = "localhost:8443"
+    forward_to = "https://localhost:8443"
 
-    [proto.tcp]
-    forward_to = "localhost:8443"
+    [service.tcp]
+    protocol = "tcp"
+    forward_to = "tcp://localhost:8443"
+
+   [service.tcp2unix]
+    protocol = "tcp"
+    forward_to = "unix:///tmp/mysql.sock"

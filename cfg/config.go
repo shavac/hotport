@@ -1,36 +1,97 @@
 package cfg
 
 import (
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
-//type portConfigs = map[string]portConfig
-//type protocolConfigs = map[string]portConfig
+var (
+	cfg      = &config{}
+	onCfgChg = []func(){}
+)
 
 type config struct {
-	Listen map[string]listenConfig
-	Proto  map[string]protoConfig
+	Plugins pluginConfig
+	Port    map[string]portConfig
+	Service map[string]serviceConfig
 }
 
-type listenConfig struct {
-	Addr     string
-	Services []string
+type pluginConfig struct {
+	Paths []string
 }
 
-type protoConfig struct {
-	Protocol  string
-	ForwardTo string `mapstructure:"forward_to"`
-	LoginUser string `mapstructure:"login_user"`
+type portConfig struct {
+	ListenAddr string
+	Services   []string
 }
 
-func ReadFromTomlFile(fname string) (*config, error) {
-	cfg := &config{}
-	v := viper.New()
-	v.SetConfigType("toml")
-	v.SetConfigFile(fname)
-	v.ReadInConfig()
-	if err := v.Unmarshal(cfg); err != nil {
-		return nil, err
+type serviceConfig struct {
+	Protocol     string
+	ForwardToURL string `mapstructure:"forward_to"`
+	LoginUser    string `mapstructure:"login_user"`
+}
+
+func OnChange(f func()) {
+	onCfgChg = append(onCfgChg, f)
+}
+
+func Config() config {
+	return *cfg
+}
+
+func ReadFromPath(path string, typ string) error {
+	switch typ {
+	case "net":
+	default:
+		viper.SetConfigName("mp1p")
+		viper.AddConfigPath(path)
+		//viper.SetConfigType(typ)
+		viper.WatchConfig()
+		viper.OnConfigChange(func(in fsnotify.Event) {
+			if in.Op != fsnotify.Write {
+				return
+			}
+			if err := viper.ReadInConfig(); err != nil {
+				return
+			}
+			if err := viper.Unmarshal(cfg); err != nil {
+				return
+			}
+			for _, f := range onCfgChg {
+				go f()
+			}
+		})
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
 	}
-	return cfg, nil
+	return viper.Unmarshal(cfg)
+}
+
+func ReadFromFile(fname, typ string) error {
+	switch typ {
+	case "net":
+	default:
+		viper.SetConfigType(typ)
+		viper.SetConfigFile(fname)
+		viper.WatchConfig()
+		viper.OnConfigChange(func(in fsnotify.Event) {
+			if in.Op != fsnotify.Write {
+				return
+			}
+			if err := viper.ReadInConfig(); err != nil {
+				return
+			}
+			if err := viper.Unmarshal(cfg); err != nil {
+				return
+			}
+			for _, f := range onCfgChg {
+				go f()
+			}
+		})
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
+	}
+	return viper.Unmarshal(cfg)
 }
