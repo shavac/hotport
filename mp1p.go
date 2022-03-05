@@ -3,9 +3,9 @@ package main
 import (
 	"net"
 
-	"github.com/prometheus/common/log"
 	"github.com/shavac/mp1p/cfg"
 	"github.com/shavac/mp1p/cmd"
+	"github.com/shavac/mp1p/log"
 )
 
 var (
@@ -31,13 +31,13 @@ func main() {
 		for pName, pCfg := range cfg.Config().Port {
 			l, err := net.Listen("tcp", pCfg.ListenAddr)
 			if err != nil {
-				log.Errorln(err)
+				log.S().Error(err)
 			}
 			allPorts[pName] = port{l}
-			defer func() {
+			defer func(pName string) {
 				allPorts[pName].Listener.Close()
 				delete(allPorts, pName)
-			}()
+			}(pName)
 		}
 		<-cfgChgEvt
 	}

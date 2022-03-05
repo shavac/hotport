@@ -2,6 +2,8 @@ package cfg
 
 import (
 	"github.com/fsnotify/fsnotify"
+	"github.com/shavac/mp1p/log"
+	"github.com/shavac/mp1p/ports"
 	"github.com/spf13/viper"
 )
 
@@ -12,23 +14,19 @@ var (
 
 type config struct {
 	Plugins pluginConfig
-	Port    map[string]portConfig
-	Service map[string]serviceConfig
+	Port    map[string]ports.Config
+	Service map[string]ServiceConfig
+	Log     log.Config
 }
 
 type pluginConfig struct {
 	Paths []string
 }
 
-type portConfig struct {
-	ListenAddr string
-	Services   []string
-}
-
-type serviceConfig struct {
+type ServiceConfig struct {
 	Protocol     string
-	ForwardToURL string `mapstructure:"forward_to"`
-	LoginUser    string `mapstructure:"login_user"`
+	ForwardToURL string   `mapstructure:"forward_to"`
+	Arguments    []string `mapstructure:"arguments"`
 }
 
 func OnChange(f func()) {
