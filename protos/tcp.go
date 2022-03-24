@@ -21,7 +21,7 @@ type tcpProc struct {
 	output io.Writer
 }
 
-func newTcpProc(name string, r io.Reader, furl *url.URL, reqs ...[]byte) protoAdaptor {
+func newTcpProc(name string, r io.Reader, furl *url.URL, reqs ...[]byte) ProtoAdaptor {
 	p := &tcpProc{
 		name:   name,
 		furl:   furl,
@@ -35,14 +35,14 @@ func (p tcpProc) GetResp() [][]byte {
 	return nil
 }
 
-func (p tcpProc) Neg(context.Context) int {
+func (p tcpProc) Neg(context.Context, []byte) (int, bool) {
 	conn, err := net.DialTimeout(p.furl.Scheme, p.furl.Host, time.Second*3)
 	if err != nil {
 		log.Println(err)
-		return -1
+		return 0, true
 	}
 	p.input = conn
-	return 0
+	return 0, true
 }
 
 func (p tcpProc) Handover(ctx context.Context) {

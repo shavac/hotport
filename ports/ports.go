@@ -2,14 +2,15 @@ package ports
 
 import (
 	"net"
+	"net/url"
 
-	"github.com/shavac/mp1p/protos"
+	p "github.com/shavac/mp1p/protos"
 )
 
 type Port struct {
 	Name       string
 	ListenAddr *net.TCPAddr
-	Services   []protos.ProtoAdaptor
+	Services   []p.ProtoAdaptor
 }
 
 func NewPort(name string, addr *net.TCPAddr) (*Port, error) {
@@ -17,6 +18,6 @@ func NewPort(name string, addr *net.TCPAddr) (*Port, error) {
 	return &p, nil
 }
 
-func (p *Port) AddServiceByConfig(protoCfg protos.Config) error {
+func (p *Port) AddService(name, proto string, target *url.URL, args []byte) error {
 	return nil
 }
