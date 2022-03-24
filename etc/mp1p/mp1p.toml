@@ -25,12 +25,12 @@ paths = ["plugins"]
 
     [service.ssh1]
     protocol = "ssh"
-    login_user = "admin"
+    arguments = ["admin"]
     forward_to = "ssh:1.1.2.1:6022"
 
     [service.ssh2]
     protocol = "ssh"
-    login_user = "bcast"
+    arguments = ["bcast"]
     forward_to = "ssh://1.1.2.1:6022"
 
     [service.ssh2]
@@ -56,3 +56,8 @@ paths = ["plugins"]
    [service.tcp2unix]
     protocol = "tcp"
     forward_to = "unix:///tmp/mysql.sock"
+
+[log]
+logpath = "/tmp/"
+level= "debug"
+encoding="console"
