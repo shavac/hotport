@@ -34,10 +34,10 @@ func main() {
 				log.Errorln(err)
 			}
 			allPorts[pName] = port{l}
-			defer func() {
+			defer func(pName string) {
 				allPorts[pName].Listener.Close()
 				delete(allPorts, pName)
-			}()
+			}(pName)
 		}
 		<-cfgChgEvt
 	}

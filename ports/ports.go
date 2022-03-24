@@ -11,6 +11,12 @@ type Port struct {
 	Services   []*Service
 }
 
+func NewPortFromConfig(cfg.)
+
+func (p *Port) Accept() {
+
+}
+
 type Service struct {
 	Name      string
 	MatchFunc func(context.Context) int
