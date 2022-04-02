@@ -1,0 +1,4 @@
+[log]
+logpath = "/tmp/"
+level= "debug"
+encoding="console"

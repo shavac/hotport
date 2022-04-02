@@ -1,0 +1,13 @@
+[port]
+
+    [port.1]
+    addr = "0.0.0.0:80"
+    services = ["http", "ssh1", "ssh2", "rdp",  "tcp"]
+
+    [port.2]
+    addr = "0.0.0.0:443"
+    services = ["https", "ssh2", "rdp"]
+
+    [port.3]
+    addr = "127.0.0.1:86"
+    services = "tcp"
