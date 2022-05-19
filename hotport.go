@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"net/netip"
 	"net/url"
 
 	"github.com/shavac/mp1p/cfg"
 	"github.com/shavac/mp1p/cmd"
+	"github.com/shavac/mp1p/global"
 	"github.com/shavac/mp1p/log"
 	"github.com/shavac/mp1p/port"
 	"github.com/shavac/mp1p/proto"
@@ -23,9 +25,15 @@ func init() {
 var allPorts = make(map[string]*port.Port)
 
 func main() {
+	if err := cfg.ReadFromPath(cmd.CfgPath); err != nil {
+		log.Errorln(err)
+	}
+	log.Setup()
+	fmt.Println(global.GetConfig())
+	log.Debugln(global.GetConfig().LogConfig.Encoding)
 	for {
 		//fmt.Println(cfg.Config())
-		for portName, portCfg := range cfg.Config().Port {
+		for portName, portCfg := range global.GetConfig().PortConfig {
 			laddr, err := net.ResolveTCPAddr("tcp", portCfg.ListenAddr)
 			if err != nil {
 				log.S().Error(err)
@@ -37,7 +45,7 @@ func main() {
 				continue
 			}
 			for _, sName := range portCfg.Services {
-				sCfg := cfg.Config().Service[sName]
+				sCfg := global.GetConfig().ServiceConfig[sName]
 				u, err := url.Parse(sCfg.ForwardToURL)
 				if err != nil {
 					log.S().Error(err)

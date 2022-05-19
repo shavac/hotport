@@ -1,8 +1,24 @@
 package global
 
-var Config struct {
-	PortConfig    portConfig
-	ServiceConfig serviceConfig
+var (
+	cfg = &config{
+		PortConfig:    make(map[string]portConfig),
+		ServiceConfig: make(map[string]serviceConfig),
+		LogConfig: logConfig{
+			LogPath:  "",
+			Level:    "DEBUG",
+			Encoding: "console",
+		},
+	}
+)
+
+func GetConfig() *config {
+	return cfg
+}
+
+type config struct {
+	PortConfig    map[string]portConfig
+	ServiceConfig map[string]serviceConfig
 	LogConfig     logConfig
 	PluginConfig  pluginConfig
 }
