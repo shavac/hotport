@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/shavac/mp1p/link"
-	"github.com/shavac/mp1p/log"
+	"github.com/shavac/hotport/link"
+	"github.com/shavac/hotport/log"
 )
 
 func init() {

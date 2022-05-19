@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"plugin"
 
-	"github.com/shavac/mp1p/errs"
-	"github.com/shavac/mp1p/link"
+	"github.com/shavac/hotport/errs"
+	"github.com/shavac/hotport/link"
 )
 
 var (

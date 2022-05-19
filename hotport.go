@@ -6,12 +6,12 @@ import (
 	"net/netip"
 	"net/url"
 
-	"github.com/shavac/mp1p/cfg"
-	"github.com/shavac/mp1p/cmd"
-	"github.com/shavac/mp1p/global"
-	"github.com/shavac/mp1p/log"
-	"github.com/shavac/mp1p/port"
-	"github.com/shavac/mp1p/proto"
+	"github.com/shavac/hotport/cfg"
+	"github.com/shavac/hotport/cmd"
+	"github.com/shavac/hotport/global"
+	"github.com/shavac/hotport/log"
+	"github.com/shavac/hotport/port"
+	"github.com/shavac/hotport/proto"
 )
 
 var (
@@ -30,10 +30,10 @@ func main() {
 	}
 	log.Setup()
 	fmt.Println(global.GetConfig())
-	log.Debugln(global.GetConfig().LogConfig.Encoding)
+	log.Debugln(global.GetConfig().Log.Encoding)
 	for {
 		//fmt.Println(cfg.Config())
-		for portName, portCfg := range global.GetConfig().PortConfig {
+		for portName, portCfg := range global.GetConfig().Port {
 			laddr, err := net.ResolveTCPAddr("tcp", portCfg.ListenAddr)
 			if err != nil {
 				log.S().Error(err)
@@ -45,7 +45,7 @@ func main() {
 				continue
 			}
 			for _, sName := range portCfg.Services {
-				sCfg := global.GetConfig().ServiceConfig[sName]
+				sCfg := global.GetConfig().Service[sName]
 				u, err := url.Parse(sCfg.ForwardToURL)
 				if err != nil {
 					log.S().Error(err)

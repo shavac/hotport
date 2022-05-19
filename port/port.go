@@ -5,9 +5,9 @@ import (
 	"net"
 	"sync"
 
-	"github.com/shavac/mp1p/link"
-	"github.com/shavac/mp1p/log"
-	"github.com/shavac/mp1p/proto"
+	"github.com/shavac/hotport/link"
+	"github.com/shavac/hotport/log"
+	"github.com/shavac/hotport/proto"
 )
 
 type Port struct {

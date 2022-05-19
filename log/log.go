@@ -1,7 +1,7 @@
 package log
 
 import (
-	"github.com/shavac/mp1p/global"
+	"github.com/shavac/hotport/global"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -48,7 +48,7 @@ func SetEncoding(enc string) {
 
 func Setup() {
 	var err error
-	conf := global.GetConfig().LogConfig
+	conf := global.GetConfig().Log
 	switch conf.Level {
 	case "DEBUG":
 		cfg.Development = true
@@ -67,7 +67,7 @@ func Setup() {
 	}
 	cfg.Encoding = conf.Encoding
 	if len(conf.LogPath) != 0 {
-		cfg.OutputPaths = []string{conf.LogPath}
+		cfg.OutputPaths = []string{conf.LogPath + "/hotport.log"}
 	}
 	nl, err := cfg.Build()
 	if err != nil {

@@ -1,29 +1,31 @@
 package cfg
 
 import (
-	"log"
+	"github.com/shavac/hotport/log"
 
-	"github.com/shavac/mp1p/global"
+	"github.com/shavac/hotport/global"
 	"github.com/spf13/viper"
 )
 
 func ReadFromPath(path string) error {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("log")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Println(err)
+	v := viper.New()
+	v.AddConfigPath(path)
+	v.SetConfigName("ports")
+	if err := v.ReadInConfig(); err != nil {
+		log.Errorln(err)
 	}
-	viper.SetConfigName("ports")
-	if err := viper.MergeInConfig(); err != nil {
-		log.Println(err)
+	v.SetConfigName("log")
+	if err := v.MergeInConfig(); err != nil {
+		log.Errorln(err)
 	}
-	viper.SetConfigName("services")
-	if err := viper.MergeInConfig(); err != nil {
-		log.Println(err)
+	v.SetConfigName("services")
+	if err := v.MergeInConfig(); err != nil {
+		log.Errorln(err)
 	}
-	viper.SetConfigName("plugins")
-	if err := viper.MergeInConfig(); err != nil {
-		log.Println(err)
+	v.SetConfigName("plugins")
+	if err := v.MergeInConfig(); err != nil {
+		log.Errorln(err)
 	}
-	return viper.Unmarshal(global.GetConfig())
+	err := v.Unmarshal(global.GetConfig())
+	return err
 }

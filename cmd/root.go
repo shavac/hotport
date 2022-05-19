@@ -16,7 +16,7 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "mp1p",
+	Use:   "hotport",
 	Short: "The network protocol proxy, support \"Multiple Protocols on 1 Port\" in particular. ",
 	Long:  ``,
 	// Uncomment the following line if your bare application
@@ -40,7 +40,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mp1p.yaml)")
+	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.hotport.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

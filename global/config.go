@@ -2,9 +2,9 @@ package global
 
 var (
 	cfg = &config{
-		PortConfig:    make(map[string]portConfig),
-		ServiceConfig: make(map[string]serviceConfig),
-		LogConfig: logConfig{
+		Port:    make(map[string]portConfig),
+		Service: make(map[string]serviceConfig),
+		Log: logConfig{
 			LogPath:  "",
 			Level:    "DEBUG",
 			Encoding: "console",
@@ -17,10 +17,10 @@ func GetConfig() *config {
 }
 
 type config struct {
-	PortConfig    map[string]portConfig
-	ServiceConfig map[string]serviceConfig
-	LogConfig     logConfig
-	PluginConfig  pluginConfig
+	Port    map[string]portConfig
+	Service map[string]serviceConfig
+	Log     logConfig
+	Plugin  pluginConfig
 }
 
 type portConfig struct {
