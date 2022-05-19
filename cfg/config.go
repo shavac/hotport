@@ -1,95 +1,29 @@
 package cfg
 
 import (
-	"github.com/fsnotify/fsnotify"
-	"github.com/shavac/mp1p/log"
-	"github.com/shavac/mp1p/ports"
+	"log"
+
+	"github.com/shavac/mp1p/global"
 	"github.com/spf13/viper"
 )
 
-var (
-	cfg      = &config{}
-	onCfgChg = []func(){}
-)
-
-type config struct {
-	Plugins pluginConfig
-	Port    map[string]ports.Config
-	Service map[string]ServiceConfig
-	Log     log.Config
-}
-
-type pluginConfig struct {
-	Paths []string
-}
-
-type ServiceConfig struct {
-	Protocol     string
-	ForwardToURL string   `mapstructure:"forward_to"`
-	Arguments    []string `mapstructure:"arguments"`
-}
-
-func OnChange(f func()) {
-	onCfgChg = append(onCfgChg, f)
-}
-
-func Config() config {
-	return *cfg
-}
-
-func ReadFromPath(path string, typ string) error {
-	switch typ {
-	case "net":
-	default:
-		viper.SetConfigName("mp1p")
-		viper.AddConfigPath(path)
-		//viper.SetConfigType(typ)
-		viper.WatchConfig()
-		viper.OnConfigChange(func(in fsnotify.Event) {
-			if in.Op != fsnotify.Write {
-				return
-			}
-			if err := viper.ReadInConfig(); err != nil {
-				return
-			}
-			if err := viper.Unmarshal(cfg); err != nil {
-				return
-			}
-			for _, f := range onCfgChg {
-				go f()
-			}
-		})
-		if err := viper.ReadInConfig(); err != nil {
-			return err
-		}
+func ReadFromPath(path string) error {
+	viper.AddConfigPath(path)
+	viper.SetConfigName("log")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Println(err)
 	}
-	return viper.Unmarshal(cfg)
-}
-
-func ReadFromFile(fname, typ string) error {
-	switch typ {
-	case "net":
-	default:
-		viper.SetConfigType(typ)
-		viper.SetConfigFile(fname)
-		viper.WatchConfig()
-		viper.OnConfigChange(func(in fsnotify.Event) {
-			if in.Op != fsnotify.Write {
-				return
-			}
-			if err := viper.ReadInConfig(); err != nil {
-				return
-			}
-			if err := viper.Unmarshal(cfg); err != nil {
-				return
-			}
-			for _, f := range onCfgChg {
-				go f()
-			}
-		})
-		if err := viper.ReadInConfig(); err != nil {
-			return err
-		}
+	viper.SetConfigName("ports")
+	if err := viper.MergeInConfig(); err != nil {
+		log.Println(err)
 	}
-	return viper.Unmarshal(cfg)
+	viper.SetConfigName("services")
+	if err := viper.MergeInConfig(); err != nil {
+		log.Println(err)
+	}
+	viper.SetConfigName("plugins")
+	if err := viper.MergeInConfig(); err != nil {
+		log.Println(err)
+	}
+	return viper.Unmarshal(global.GetConfig())
 }
