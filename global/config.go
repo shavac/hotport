@@ -4,11 +4,7 @@ var (
 	cfg = &config{
 		Port:    make(map[string]portConfig),
 		Service: make(map[string]serviceConfig),
-		Log: logConfig{
-			LogPath:  "",
-			Level:    "DEBUG",
-			Encoding: "console",
-		},
+		Log:     logConfig{},
 	}
 )
 
@@ -39,7 +35,7 @@ type pluginConfig struct {
 }
 
 type logConfig struct {
-	LogPath  string
-	Level    string
-	Encoding string
+	LogPath string
+	Level   string
+	Format  string
 }

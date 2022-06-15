@@ -1,6 +1,8 @@
 package log
 
 import (
+	"strings"
+
 	"github.com/shavac/hotport/global"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -49,23 +51,12 @@ func SetEncoding(enc string) {
 func Setup() {
 	var err error
 	conf := global.GetConfig().Log
-	switch conf.Level {
-	case "DEBUG":
-		cfg.Development = true
-		println(111)
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
-	case "INFO":
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
-	case "WARN":
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.WarnLevel)
-	case "ERROR":
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.ErrorLevel)
-	case "PANIC":
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.PanicLevel)
-	default:
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.WarnLevel)
+	if strings.ToUpper(conf.Level) == "DEBUG" {
+		cfg = zap.NewDevelopmentConfig()
+	} else if cfg.Level, err = zap.ParseAtomicLevel(conf.Level); err != nil {
+		cfg.Level = zap.NewAtomicLevel()
 	}
-	cfg.Encoding = conf.Encoding
+	cfg.Encoding = conf.Format
 	if len(conf.LogPath) != 0 {
 		cfg.OutputPaths = []string{conf.LogPath + "/hotport.log"}
 	}

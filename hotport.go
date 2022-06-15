@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"net/netip"
 	"net/url"
@@ -29,10 +28,8 @@ func main() {
 		log.Errorln(err)
 	}
 	log.Setup()
-	fmt.Println(global.GetConfig())
-	log.Debugln(global.GetConfig().Log.Encoding)
+	log.Infoln(global.GetConfig())
 	for {
-		//fmt.Println(cfg.Config())
 		for portName, portCfg := range global.GetConfig().Port {
 			laddr, err := net.ResolveTCPAddr("tcp", portCfg.ListenAddr)
 			if err != nil {
