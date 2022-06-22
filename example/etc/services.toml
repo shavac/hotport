@@ -32,7 +32,7 @@
 
     [service.tcp]
     protocol = "tcp"
-    forward_to = "tcp://localhost:8443"
+    forward_to = "tcp://www.sina.com.cn:80"
 
    [service.tcp2unix]
     protocol = "tcp"

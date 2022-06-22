@@ -9,21 +9,29 @@ import (
 )
 
 var (
-	l, _    = zap.NewProduction()
 	cfg     = zap.NewProductionConfig()
-	Fatalln = S().Panic
-	Errorln = S().Error
-	Warnln  = S().Warn
-	Infoln  = S().Info
-	Debugln = S().Debug
+	l, _    = zap.NewProduction()
+	s       = l.Sugar()
+	Fatalln = s.Panic
+	Errorln = s.Error
+	Warnln  = s.Warn
+	Infoln  = s.Info
+	Debugln = s.Debug
 )
 
-func L() *zap.Logger {
-	return l
-}
-
-func S() *zap.SugaredLogger {
-	return l.Sugar()
+func buildLoggers(cfg zap.Config) error {
+	if nl, err := cfg.Build(); err != nil {
+		return nil
+	} else {
+		l = nl
+	}
+	s = l.Sugar()
+	Fatalln = s.Panic
+	Errorln = s.Error
+	Warnln = s.Warn
+	Infoln = s.Info
+	Debugln = s.Debug
+	return nil
 }
 
 /*
@@ -33,22 +41,22 @@ func SetLogFileName(lf string) {
 }
 */
 
-func SetLevel(lvl zapcore.Level) {
+func SetLevel(lvl zapcore.Level) error {
 	cfg.Level = zap.NewAtomicLevelAt(lvl)
-	l, _ = cfg.Build()
+	return buildLoggers(cfg)
 }
 
-func SetStackTrace(trace bool) {
+func SetStackTrace(trace bool) error {
 	cfg.DisableStacktrace = !trace
-	l, _ = cfg.Build()
+	return buildLoggers(cfg)
 }
 
-func SetEncoding(enc string) {
+func SetEncoding(enc string) error {
 	cfg.Encoding = enc
-	l, _ = cfg.Build()
+	return buildLoggers(cfg)
 }
 
-func Setup() {
+func Setup() error {
 	var err error
 	conf := global.GetConfig().Log
 	if strings.ToUpper(conf.Level) == "DEBUG" {
@@ -56,13 +64,11 @@ func Setup() {
 	} else if cfg.Level, err = zap.ParseAtomicLevel(conf.Level); err != nil {
 		cfg.Level = zap.NewAtomicLevel()
 	}
-	cfg.Encoding = conf.Format
+	if conf.Format != "" {
+		cfg.Encoding = conf.Format
+	}
 	if len(conf.LogPath) != 0 {
 		cfg.OutputPaths = []string{conf.LogPath + "/hotport.log"}
 	}
-	nl, err := cfg.Build()
-	if err != nil {
-		Fatalln(err)
-	}
-	l = nl
+	return buildLoggers(cfg)
 }

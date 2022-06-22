@@ -49,10 +49,10 @@ func (p tcpProt) TryConn(ctx context.Context, b []byte, in net.Conn) (*link.Link
 	if p.fwdURL.Port() == "" {
 		hostPort = net.JoinHostPort(p.fwdURL.Hostname(), p.fwdURL.Scheme)
 	}
-	log.S().Error(hostPort)
+	log.Errorln(hostPort)
 	out, err := net.Dial("tcp", hostPort)
 	if err != nil {
-		log.S().Error(err)
+		log.Errorln(err)
 		return nil, []byte{}, false
 	}
 	l := link.Link{
@@ -101,7 +101,7 @@ func readIntoChan(in io.ReadWriteCloser) chan []byte {
 			if err != nil {
 				close(inCh)
 				if err != io.EOF {
-					log.S().Error(err)
+					log.Errorln(err)
 				}
 				break
 			}

@@ -20,6 +20,7 @@ type protoServiceFunc func(string, *url.URL, ...string) (ProtoService, error)
 type ProtoService interface {
 	TryConn(context.Context, []byte, net.Conn) (*link.Link, []byte, bool) //link, bytes read in, match ok
 	LocalURL() *url.URL
+	Name() string
 }
 
 func RegisterProtoServiceFunc(name string, f protoServiceFunc) {

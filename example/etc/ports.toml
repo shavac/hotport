@@ -9,5 +9,5 @@
     services = ["https", "ssh2", "rdp"]
 
     [port.3]
-    addr = "127.0.0.1:86"
+    addr = ":86"
     services = "tcp"

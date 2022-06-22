@@ -27,36 +27,39 @@ func main() {
 	if err := cfg.ReadFromPath(cmd.CfgPath); err != nil {
 		log.Errorln(err)
 	}
-	log.Setup()
-	log.Infoln(global.GetConfig())
+	if err := log.Setup(); err != nil {
+		log.Fatalln(err)
+	}
+	log.Infoln("Starting hotport.")
 	for {
 		for portName, portCfg := range global.GetConfig().Port {
 			laddr, err := net.ResolveTCPAddr("tcp", portCfg.ListenAddr)
 			if err != nil {
-				log.S().Error(err)
+				log.Errorln(err)
 				continue
 			}
 			p, err := port.NewPort(portName, laddr)
 			if err != nil {
-				log.S().Error(err)
+				log.Errorln(err)
 				continue
 			}
 			for _, sName := range portCfg.Services {
 				sCfg := global.GetConfig().Service[sName]
 				u, err := url.Parse(sCfg.ForwardToURL)
 				if err != nil {
-					log.S().Error(err)
+					log.Errorln(err)
 					continue
 				}
 				s, err := proto.NewService(sName, sCfg.Protocol, u, sCfg.Arguments...)
 				if err != nil {
-					log.S().Error(err)
+					log.Errorln(err)
 					continue
 				}
 				p.AddService(s)
 			}
 			allPorts[portName] = p
 			p.Accept()
+			log.Infoln("Accepting from ", p)
 			defer func(pName string) {
 				allPorts[pName].Close()
 				delete(allPorts, pName)

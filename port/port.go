@@ -3,6 +3,7 @@ package port
 import (
 	"context"
 	"net"
+	"strings"
 	"sync"
 
 	"github.com/shavac/hotport/link"
@@ -26,11 +27,24 @@ func NewPort(name string, addr *net.TCPAddr) (*Port, error) {
 	return &p, nil
 }
 
+func (p *Port) String() string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	svcStrs := []string{}
+	for _, svc := range p.svcs {
+		svcStrs = append(svcStrs, svc.Name())
+	}
+	s := p.lis.Addr().String() + " {" + strings.Join(svcStrs, ", ") + "}"
+	return s
+}
+
 func (p *Port) Name() string {
 	return p.name
 }
 
 func (p *Port) AddService(svcs ...proto.ProtoService) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.svcs = append(p.svcs, svcs...)
 	return nil
 }
@@ -46,11 +60,13 @@ func (p *Port) Close() error {
 }
 
 func (p *Port) accept() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	for {
 		conn, err := p.lis.Accept()
 
 		if err != nil {
-			log.S().Error(err)
+			log.Errorln(err)
 			continue
 		}
 		//conn.SetDeadline(time.Now().Add((10 * time.Second)))
