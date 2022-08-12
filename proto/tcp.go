@@ -2,21 +2,18 @@ package proto
 
 import (
 	"context"
-	"io"
 	"net"
 	"net/url"
 
-	"github.com/shavac/hotport/link"
 	"github.com/shavac/hotport/log"
 )
 
 func init() {
 	RegisterProtoServiceFunc("tcp", newTcpProt)
 	////////////////////////////////
-	RegisterProtoServiceFunc("ssh", newTcpProt)
-	RegisterProtoServiceFunc("rdp", newTcpProt)
-	RegisterProtoServiceFunc("http", newTcpProt)
-	RegisterProtoServiceFunc("https", newTcpProt)
+	// RegisterProtoServiceFunc("ssh", newTcpProt)
+	// RegisterProtoServiceFunc("rdp", newTcpProt)
+	// RegisterProtoServiceFunc("https", newTcpProt)
 }
 
 type tcpProt struct {
@@ -42,70 +39,25 @@ func (p tcpProt) LocalURL() *url.URL {
 	return p.fwdURL
 }
 
-func (p tcpProt) TryConn(ctx context.Context, b []byte, in net.Conn) (*link.Link, []byte, bool) {
+func (p tcpProt) TryConn(ctx context.Context, msg NegMsg, in net.Conn) (net.Conn, NegMsg, bool) {
 	//d := net.Dialer{}
 
 	hostPort := net.JoinHostPort(p.fwdURL.Hostname(), p.fwdURL.Port())
 	if p.fwdURL.Port() == "" {
 		hostPort = net.JoinHostPort(p.fwdURL.Hostname(), p.fwdURL.Scheme)
 	}
-	log.Errorln(hostPort)
 	out, err := net.Dial("tcp", hostPort)
 	if err != nil {
-		log.Errorln(err)
-		return nil, []byte{}, false
+		log.Errorln("Connectionting to ", hostPort, "ERROR: ", err)
+		return nil, msg, false
 	}
-	l := link.Link{
-		ServiceName: p.name,
-		RemoteAddr:  in.RemoteAddr(),
-		DialInConn:  in,
-		DialOutConn: out,
-		TransportFunc: func() {
-			pipe(in, out)
-		},
-	}
-	go l.Transport()
-	return &l, []byte{}, true
+	log.Debugln("Connected to ", hostPort)
+
+	return out, msg, true
 }
 
-func pipe(in, out io.ReadWriteCloser) {
-	inCh, outCh := readIntoChan(in), readIntoChan(out)
-LOOP:
-	for {
-		select {
-		case b1, ok := <-inCh:
-			if !ok {
-				out.Close()
-				break LOOP
-			}
-			out.Write(b1)
-		case b2, ok := <-outCh:
-			if !ok {
-				in.Close()
-				break LOOP
-			}
-			in.Write(b2)
-		}
-	}
-}
-
-func readIntoChan(in io.ReadWriteCloser) chan []byte {
-	inCh := make(chan []byte)
-	go func() {
-		for {
-			bs := make([]byte, 128)
-			n, err := in.Read(bs)
-			if n > 0 {
-				inCh <- bs
-			}
-			if err != nil {
-				close(inCh)
-				if err != io.EOF {
-					log.Errorln(err)
-				}
-				break
-			}
-		}
-	}()
-	return inCh
+func (p tcpProt) Transport(msg NegMsg, in, out net.Conn) {
+	out.Write(msg.inb)
+	in.Write(msg.outb)
+	pipe(in, out)
 }

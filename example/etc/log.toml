@@ -1,4 +1,4 @@
 [log]
 logpath = "/tmp"
-level= "INFO"
+level= "DEBUG"
 format="console"

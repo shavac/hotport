@@ -63,27 +63,39 @@ func (p *Port) accept() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	for {
-		conn, err := p.lis.Accept()
+		in, err := p.lis.Accept()
 
 		if err != nil {
 			log.Errorln(err)
 			continue
 		}
+		log.Infoln("Receiving connection from ", in.RemoteAddr().String())
 		//conn.SetDeadline(time.Now().Add((10 * time.Second)))
 		go func() {
-			var l *link.Link
-			msg, ok := []byte{}, false
+			msg := proto.NegMsg{}
 			for _, pa := range p.svcs {
-				//ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+				var out net.Conn
+				var ok bool
+				log.Debugln("Try protocol ", pa.Name())
 				ctx := context.Background()
-				l, msg, ok = pa.TryConn(ctx, msg, conn)
+				out, msg, ok = pa.TryConn(ctx, msg, in)
+				l := &link.Link{
+					ServiceName: pa.Name(),
+					RemoteAddr:  in.RemoteAddr(),
+					DialInConn:  in,
+					DialOutConn: out,
+				}
 				if ok {
+					log.Debugln("Connection from ", l.RemoteAddr.String(), " match service ", pa.Name())
 					link.RegisterLink(l)
-					break
+					pa.Transport(msg, in, out)
+					goto MATCH
 				} else {
-					conn.Close()
+					log.Debugln("Connection from ", l.RemoteAddr.String(), " NOT match service ", pa.Name())
 				}
 			}
+			in.Close()
+		MATCH:
 		}()
 	}
 }

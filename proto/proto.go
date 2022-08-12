@@ -2,12 +2,14 @@ package proto
 
 import (
 	"context"
+	"errors"
+	"io"
 	"net"
 	"net/url"
 	"plugin"
 
 	"github.com/shavac/hotport/errs"
-	"github.com/shavac/hotport/link"
+	"github.com/shavac/hotport/log"
 )
 
 var (
@@ -15,12 +17,17 @@ var (
 	pluginPath  = make(map[string]bool)
 )
 
+type NegMsg struct {
+	inb, outb []byte
+}
+
 type protoServiceFunc func(string, *url.URL, ...string) (ProtoService, error)
 
 type ProtoService interface {
-	TryConn(context.Context, []byte, net.Conn) (*link.Link, []byte, bool) //link, bytes read in, match ok
-	LocalURL() *url.URL
 	Name() string
+	TryConn(context.Context, NegMsg, net.Conn) (net.Conn, NegMsg, bool) //link, bytes read in, match ok
+	LocalURL() *url.URL
+	Transport(NegMsg, net.Conn, net.Conn) // NegMsg, in, out
 }
 
 func RegisterProtoServiceFunc(name string, f protoServiceFunc) {
@@ -53,4 +60,49 @@ func NewService(svcName, protoName string, tgtUrl *url.URL, args ...string) (Pro
 		return nil, errs.ErrNotImplemented
 	}
 	return f(svcName, tgtUrl, args...)
+}
+
+func pipe(in, out io.ReadWriteCloser) {
+	inCh, outCh := readIntoChan(in), readIntoChan(out)
+LOOP:
+	for {
+		select {
+		case b1, ok := <-inCh:
+			if !ok {
+				out.Close()
+				break LOOP
+			}
+			out.Write(b1)
+		case b2, ok := <-outCh:
+			if !ok {
+				in.Close()
+				break LOOP
+			}
+			in.Write(b2)
+		}
+	}
+}
+
+func readIntoChan(in io.ReadWriteCloser) chan []byte {
+	inCh := make(chan []byte)
+	go func() {
+		defer func() {
+			close(inCh)
+		}()
+		for {
+			bs := make([]byte, 128)
+			n, err := in.Read(bs)
+			if n > 0 {
+				inCh <- bs
+			}
+			if errors.Is(err, io.EOF) || errors.Is(err, net.ErrClosed) {
+				break
+			}
+			if err != nil {
+				log.Errorln("Reading from network error:, ", err)
+				break
+			}
+		}
+	}()
+	return inCh
 }

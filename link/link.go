@@ -36,11 +36,6 @@ type Link struct {
 	ServiceName             string
 	RemoteAddr              net.Addr
 	DialInConn, DialOutConn io.ReadWriteCloser
-	TransportFunc           func()
-}
-
-func (l Link) Transport() {
-	go l.TransportFunc()
 }
 
 func (l Link) Close() error {

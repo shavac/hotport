@@ -2,7 +2,7 @@
 
     [port.1]
     addr = "0.0.0.0:80"
-    services = ["http", "ssh1", "ssh2", "rdp",  "tcp"]
+    services = ["http", "tcp"]
 
     [port.2]
     addr = "0.0.0.0:443"

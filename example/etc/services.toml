@@ -24,7 +24,7 @@
 
     [service.http]
     protocol = "http"
-    forward_to = "http://localhost:8080"
+    forward_to = "http://www.google.com:80"
 
     [service.https]
     protocol = "https"
@@ -32,7 +32,7 @@
 
     [service.tcp]
     protocol = "tcp"
-    forward_to = "tcp://www.sina.com.cn:80"
+    forward_to = "tcp://youtube.com:80"
 
    [service.tcp2unix]
     protocol = "tcp"
